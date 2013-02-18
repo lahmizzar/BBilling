@@ -1,0 +1,14 @@
+{
+    "name": "BoxBilling Theme without branding",
+    "version": "1.0.0",
+    "description": "Use this theme if you have ordered BoxBilling PRO license.",
+    "icon": "screenshot.jpg",
+    "author": "BoxBilling",
+    "author_url": "http://extensions.boxbilling.com/",
+
+    "meta_title": "",
+    "meta_description": "",
+    "meta_keywords": "",
+
+    "extends": "boxbilling"
+}
