@@ -19,7 +19,7 @@
 /**
  * @see http://alwaysontop617.github.io/webister/
  */
-class Server_Manager_Virtualmin extends Server_Manager
+class Server_Manager_Webister extends Server_Manager
 {
 	public function init()
 	{
@@ -137,14 +137,6 @@ class Server_Manager_Virtualmin extends Server_Manager
         throw new Server_Exception('Server manager does not support ip changes');
     }
     
-    /**
-     *
-     * Makes request to virtualmin server
-     * @param string $command
-     * @param array $params
-     * @param string $format
-     * @return array
-     */
     private function _makeRequest($command, $params = array(), $format = 'json')
     {
     	$url = $this->_getUrl() . '?program=' . $command . '&' . $format . '=1';
@@ -232,57 +224,7 @@ class Server_Manager_Virtualmin extends Server_Manager
      */
     private function _createReseller(Server_Account $a)
     {
-    	if (!$this->_checkCommand('create-reseller')) {
-    		throw new Server_Exception('Create reseller command is only available in Virtualmin PRO version');
-    	}
-
-    	$p = $a->getPackage();
-    	$params = array(
-    		'name'			=>	$a->getUsername(),
-    		'pass'			=>	$a->getPassword(),
-    		'email'			=>	$a->getEmail(),
-    		'max-doms'		=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDomains(),
-    		'max-aliasdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDomains(),
-    		'max-realdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDomains(),
-    		'max-quota'		=>	($p->getQuota() == 'unlimited') ? 'UNLIMITED' : (int)$p->getQuota() * 1024,
-    		'max-mailboxes'	=>	(int)$p->getPop(),
-    		'max-aliases'	=>	(int)$p->getMaxDomains() ? $p->getMaxDomains() : 1,
-    		'max-dbs'		=>	($p->getMaxDb() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDb(),
-    		'max-bw'		=>	($p->getBandwidth() == 'unlimited') ? 'UNLIMITED' : (int)$p->getBandwidth() * 1024 * 1024,
-    		'allow1'		=>	'dns',		//BIND DNS domain
-    		'allow2'		=>	'web',		//Apache website
-    		'allow3'		=>	'webmin',	//Webmin login
-    		'allow4'		=>	'dir',		//Home directory
-    		'allow5'		=>	'virt',		//Virtual IP address
-    		'nameserver1'	=>	$a->getNs1(),
-    		'nameserver2'	=>	$a->getNs2(),
-    		'nameserver3'	=>	$a->getNs3(),
-    		'nameserver4'	=>	$a->getNs4(),
-    	);
-        if ($p->getMaxPop()) {
-    		$params['allow6'] = 'mail';
-    	}
-    	if ($p->getHasSsl()) {
-    		$params['allow7'] = 'ssl';
-    	}
-    	if ($p->getMaxFtp() > 0) {
-    		$params['allow8'] = 'ftp';
-    	}
-    	if ($p->getHasSpamFilter()) {
-    		$params['allow9'] = 'spam';
-    	}
-    	if ($p->getMaxSql() > 0) {
-    		$params['allow10'] = 'mysql';
-    	}
-
-    	$response = $this->_makeRequest('create-reseller', $params);
-
-    	if (isset($response['status']) && $response['status'] == 'success') {
-    		return true;
-    	} else {
-    		throw new Server_Exception('Failed to create reseller\'s account');
-    	}
-
+    
     	return false;
     }
 
@@ -565,99 +507,12 @@ class Server_Manager_Virtualmin extends Server_Manager
 
     private function _cancelReseller(Server_Account $a)
     {
-        if (!$this->_checkCommand('create-reseller')) {
-    		throw new Server_Exception('Cancel reseller command only available in Virtualmin PRO version');
-    	}
-    	$params = array(
-    		'name'	=>	$a->getUsername(),
-    	);
-
-    	$response = $this->_makeRequest('delete-reseller', $params);
-
-    	if (isset($response['status']) && $response['status'] == 'success') {
-    		return true;
-    	} else {
-    		throw new Server_Exception('Failed to delete reseller');
-    	}
-
-    	return false;
-    }
-
-    private function _changeResellerPassword(Server_Account $a)
-    {
-    	if (!$this->_checkCommand('modify-reseller')) {
-    		throw new Server_Exception('Modify reseller comand is only available in Virtualmin PRO version');
-    	}
-
-    	$params = array(
-    		'name'	=>	$a->getUsername(),
-    		'pass'	=>	$a->getPassword(),
-    	);
-
-    	$response = $this->_makeRequest('modify-reseller', $params);
-
-    	if (isset($response['status']) && $response['status'] == 'success') {
-    		return true;
-    	} else {
-    		throw new Server_Exception('Failed to change reseller\'s password');
-    	}
-
-    	return false;
+       return false;
     }
 
     private function _modifyReseller(Server_Account $a)
     {
-    	if (!$this->_checkCommand('modify-reseller')) {
-    		throw new Server_Exception('Modify reseller command is only available in Virtualmin PRO version');
-    	}
-
-		$p = $a->getPackage();
-    	$params = array(
-    		'name'			=>	$a->getUsername(),
-    		'pass'			=>	$a->getPassword(),
-    		'email'			=>	$a->getEmail(),
-    		'max-doms'		=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : $p->getMaxDomains(),
-    		'max-aliasdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : $p->getMaxDomains(),
-    		'max-realdoms'	=>	($p->getMaxDomains() == 'unlimited') ? 'UNLIMITED' : $p->getMaxDomains(),
-    		'max-quota'		=>	($p->getQuota() == 'unlimited') ? 'UNLIMITED' : (int)$p->getQuota() * 1024,
-    		'max-mailboxes'	=>	(int)$p->getPop(),
-    		'max-aliases'	=>	(int)$p->getMaxDomains() ? $p->getMaxDomains() : 1,
-    		'max-dbs'		=>	($p->getMaxDb() == 'unlimited') ? 'UNLIMITED' : (int)$p->getMaxDb(),
-    		'max-bw'		=>	($p->getBandwidth() == 'unlimited') ? 'UNLIMITED' : (int)$p->getBandwidth() * 1024 * 1024,
-    		'allow1'		=>	'dns',		//BIND DNS domain
-    		'allow2'		=>	'web',		//Apache website
-    		'allow3'		=>	'webmin',	//Webmin login
-    		'allow4'		=>	'dir',		//Home directory
-    		'allow5'		=>	'virt',		//Virtual IP address
-    		'nameserver1'	=>	$a->getNs1(),
-    		'nameserver2'	=>	$a->getNs2(),
-    		'nameserver3'	=>	$a->getNs3(),
-    		'nameserver4'	=>	$a->getNs4(),
-    	);
-        if ($p->getMaxPop()) {
-    		$params['allow6'] = 'mail';
-    	}
-    	if ($p->getHasSsl()) {
-    		$params['allow7'] = 'ssl';
-    	}
-    	if ($p->getMaxFtp() > 0) {
-    		$params['allow8'] = 'ftp';
-    	}
-    	if ($p->getHasSpamFilter()) {
-    		$params['allow9'] = 'spam';
-    	}
-    	if ($p->getMaxSql() > 0) {
-    		$params['allow10'] = 'mysql';
-    	}
-
-    	$response = $this->_makeRequest('modify-reseller', $params);
-
-    	if (isset($response['status']) && $response['status'] == 'success') {
-    		return true;
-    	} else {
-    		throw new Server_Exception('Failed to create reseller\'s account');
-    	}
-
+    
     	return false;
     }
 }
